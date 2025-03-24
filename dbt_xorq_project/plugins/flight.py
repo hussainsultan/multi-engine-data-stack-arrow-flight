@@ -30,11 +30,6 @@ class Plugin(BasePlugin):
         table_name = None
         if "table_name" in source_config.meta:
             table_name = source_config.meta["table_name"]
-        elif "table_name" in source_config:
-            table_name = source_config["table_name"]
-        
-        if not table_name:
-            table_name = source_config.identifier
         
         logger.info(f"Loading data from Iceberg table: {table_name}")
         
