@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: test_write_model
+    description: "A test model for writing to Iceberg tables via Flight"
+    config:
+      materialized: external
+      location: 'data/tmp/test_write.parquet'
+      plugin: flight
+      overrides:
+        table_name: concurrent_test
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        tests:
+          - unique
+          - not_null
+      - name: value
+        description: "The value field"

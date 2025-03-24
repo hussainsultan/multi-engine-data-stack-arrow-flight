@@ -58,15 +58,35 @@ class Plugin(BasePlugin):
             logger.error(f"Error loading data from Flight server: {e}")
             raise RuntimeError(f"Failed to load data from Flight server: {e}")
 
+
     def store(self, target_config: TargetConfig):
-        if not target_config.location:
-            raise ValueError("Target config does not have a location")
-        
-        table_name = target_config.relation.identifier
-        location_path = target_config.location.path
-        
-        logger.info(f"Storing data to Iceberg table: {table_name} from {location_path}")
-        pass
+        try:
+            logger.info("inside store")
+            
+            table_name = target_config.relation.identifier
+            if hasattr(target_config, 'config') and target_config.config:
+                overrides = target_config.config.get('overrides', {})
+                if 'table_name' in overrides:
+                    table_name = overrides['table_name']
+            
+            logger.info(f"Storing data to Iceberg table: {table_name}")
+            
+            from dbt.adapters.duckdb.plugins import pd_utils
+            df = pd_utils.target_to_df(target_config)
+            
+            if df.empty:
+                logger.warning(f"No data to store in table {table_name}")
+                return
+            
+            import pyarrow as pa
+            arrow_table = pa.Table.from_pandas(df)
+            
+            self._client.upload_data(table_name, arrow_table)
+            logger.info(f"Successfully uploaded {len(df)} rows to {table_name}")
+                
+        except Exception as e:
+            logger.error(f"Error storing data to Iceberg table {table_name}: {e}")
+            raise RuntimeError(f"Failed to store data to Iceberg table {table_name}: {e}")
 
     def default_materialization(self):
         return "table"

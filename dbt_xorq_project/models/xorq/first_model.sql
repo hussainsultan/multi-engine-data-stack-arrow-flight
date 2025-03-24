@@ -1,5 +1,6 @@
 {{ config(
-    materialized='table'
+    materialized='table',
+    adapter_plugin='flight'
 ) }}
 
 -- Read from the source table
