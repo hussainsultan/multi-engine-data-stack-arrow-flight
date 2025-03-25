@@ -28,14 +28,12 @@ class Plugin(BasePlugin):
 
     def load(self, source_config: SourceConfig):
         table_name = source_config.identifier
-
-        
         logger.info(f"Loading data from Iceberg table: {table_name}")
         
         try:
             import xorq as xo
             import pyarrow as pa
-            # FIXME: avoid hardcoding and interop with sources.yml
+            # TODO: avoid hardcoding and interop with sources.yml
             schema=pa.schema(
                 [
                     pa.field("id", pa.int64(), nullable=True),
