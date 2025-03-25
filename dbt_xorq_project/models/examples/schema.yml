@@ -5,7 +5,6 @@ models:
     description: "A test model for writing to Iceberg tables via Flight"
     config:
       materialized: external
-      location: 'data/tmp/test_write.parquet'
       plugin: flight
       overrides:
         table_name: concurrent_test

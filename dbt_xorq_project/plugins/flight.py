@@ -12,7 +12,7 @@ logger = AdapterLogger("DuckDB")
 
 class Plugin(BasePlugin):
     """
-    An experimental dbt-duckdb plugin for connecting to xorq Flight servers with Iceberg tables.
+    An experimental dbt-duckdb plugin for connecting to Flight servers with Iceberg tables.
     """
     
     def initialize(self, plugin_config: Dict[str, Any]):
@@ -27,9 +27,8 @@ class Plugin(BasePlugin):
             raise RuntimeError(f"Failed to connect to Flight server: {e}")
 
     def load(self, source_config: SourceConfig):
-        table_name = None
-        if "table_name" in source_config.meta:
-            table_name = source_config.meta["table_name"]
+        table_name = source_config.identifier
+
         
         logger.info(f"Loading data from Iceberg table: {table_name}")
         
@@ -39,12 +38,13 @@ class Plugin(BasePlugin):
             # FIXME: avoid hardcoding and interop with sources.yml
             schema=pa.schema(
                 [
-                    pa.field("id", pa.int64(), nullable=False),
-                    pa.field("value", pa.string(), nullable=False),
+                    pa.field("id", pa.int64(), nullable=True),
+                    pa.field("value", pa.string(), nullable=True),
                 ]
             )
             
             table_ref = xo.table(name=table_name, schema=schema)
+            logger.info(f"table_ref: {table_name}")
 
             result = self._client.execute_query(table_ref.as_table())
             

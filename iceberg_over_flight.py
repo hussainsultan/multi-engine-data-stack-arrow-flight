@@ -86,7 +86,7 @@ class IcebergConnector:
                 iceberg_type = StringType()
 
             iceberg_fields.append(
-                NestedField(i, field.name, iceberg_type, required=True)
+               NestedField(i, field.name, iceberg_type, required=False)
             )
 
         iceberg_schema = Schema(*iceberg_fields)
@@ -107,10 +107,13 @@ class IcebergConnector:
         with iceberg_table.transaction() as transaction:
             transaction.append(data)
 
+        print(f"Inserted: {data}")
+
         return True
 
     def to_pyarrow_batches(self, expr, **kwargs):
         self._reflect_views()
+        print(f"Read expr: {expr}")
 
         return self.con.to_pyarrow_batches(expr)
 
